@@ -7,231 +7,201 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  :root {
+    --bg:        #0d0d11;
+    --accent:    #34d399;
+    --accent-d:  #10b981;
+    --text:      #e4e4e7;
+    --muted:     #71717a;
+    --line:      rgba(255,255,255,.08);
+    --ease:      cubic-bezier(.22,1,.36,1);
+    --pop:       cubic-bezier(.34,1.56,.64,1);
+  }
+
   body {
     min-height: 100vh;
     min-height: 100dvh;
-    background: #0f0f13;
-    color: #d4d4d8;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(1200px 500px at 50% -10%, #1a1a24 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 28px 16px 48px;
+    padding: 30px 16px 56px;
     -webkit-tap-highlight-color: transparent;
+    animation: fadeUp .5s var(--ease);
   }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none; } }
 
   /* --- Header --- */
-  .header { text-align: center; margin-bottom: 28px; }
+  .header { text-align: center; margin-bottom: 26px; }
   .header h1 {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: #e4e4e7;
+    font-size: 19px; font-weight: 700; letter-spacing: .14em; color: #f4f4f5;
   }
-  .header p {
-    font-size: 13px;
-    color: #71717a;
-    margin-top: 6px;
-    letter-spacing: 0.02em;
-  }
+  .header p { font-size: 12.5px; color: var(--muted); margin-top: 7px; letter-spacing: .02em; }
 
   /* --- Selectors --- */
-  .selectors {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+  .selectors { display:flex; gap:14px; margin-bottom:26px; flex-wrap:wrap; justify-content:center; }
   .sel-group label {
-    display: block;
-    font-size: 10px;
-    color: #a1a1aa;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    display:block; font-size:10px; color:#a1a1aa; margin-bottom:5px;
+    text-transform:uppercase; letter-spacing:.14em;
   }
   .sel-group select {
-    background: #1c1c24;
-    border: 1px solid #2e2e3a;
-    border-radius: 6px;
-    color: #e4e4e7;
-    padding: 8px 14px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-    min-width: 100px;
-    -webkit-appearance: none;
-    appearance: none;
+    background:#16161d; border:1px solid #2a2a36; border-radius:9px; color:var(--text);
+    padding:9px 34px 9px 15px; font-size:16px; font-weight:600; cursor:pointer; outline:none;
+    min-width:130px; -webkit-appearance:none; appearance:none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2371717a' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 5h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px;
+    background-repeat:no-repeat; background-position:right 12px center;
   }
-  .sel-group select:focus { border-color: #4ade80; }
+  .sel-group select:hover { border-color:#3f3f4d; }
+  .sel-group select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(52,211,153,.14); }
 
   /* --- Key display --- */
-  .key-display { text-align: center; margin-bottom: 22px; }
+  .key-display { text-align:center; margin-bottom:18px; }
   .key-display .root {
-    font-size: 32px;
-    font-weight: 800;
-    color: #fafafa;
-    letter-spacing: 0.02em;
+    font-size:34px; font-weight:800; letter-spacing:.01em;
+    background:linear-gradient(180deg,#ffffff,#c2c2cc);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .key-display .scale-name {
-    font-size: 17px;
-    font-weight: 400;
-    color: #a1a1aa;
-    margin-left: 10px;
-  }
+  .key-display .scale-name { font-size:16px; font-weight:400; color:#9a9aa3; margin-left:9px; }
 
-  /* --- Piano --- */
-  .piano-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-    aspect-ratio: 520 / 180;
-    margin-bottom: 12px;
+  /* --- Actions --- */
+  .actions { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; justify-content:center; }
+  .btn {
+    display:inline-flex; align-items:center; gap:7px; padding:10px 17px; border-radius:11px;
+    border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+    font-size:13px; font-weight:600; cursor:pointer;
+    transition: transform .13s var(--pop), background .2s, border-color .2s, box-shadow .2s;
   }
+  .btn:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); }
+  .btn:active { transform:scale(.95); }
+  .btn-primary {
+    background:linear-gradient(180deg,var(--accent),var(--accent-d)); color:#04150f; border:none;
+    box-shadow:0 4px 16px rgba(16,185,129,.32);
+  }
+  .btn-primary:hover { box-shadow:0 6px 20px rgba(16,185,129,.42); }
 
-  .wkey {
-    position: absolute;
-    height: 100%;
-    border: 1.5px solid #27272a;
-    border-radius: 0 0 7px 7px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding-bottom: 8px;
-    transition: background 0.15s ease;
+  /* --- Piano case --- */
+  .piano-case {
+    width:100%; max-width:540px; padding:12px 12px 14px; border-radius:18px;
+    background:linear-gradient(180deg,#1c1c24,#101016);
+    border:1px solid rgba(255,255,255,.05);
+    box-shadow: 0 22px 50px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05);
+    margin-bottom:14px;
   }
+  .piano-case::before {
+    content:""; display:block; height:3px; border-radius:3px; margin-bottom:11px;
+    background:linear-gradient(90deg, transparent, rgba(52,211,153,.5), transparent);
+  }
+  .piano-wrap { position:relative; width:100%; aspect-ratio: 540 / 184; }
+
+  .key {
+    position:absolute; top:0; user-select:none; cursor:pointer; transform-origin:bottom center;
+    transition:
+      background-color .45s var(--ease),
+      box-shadow      .45s var(--ease),
+      color           .45s ease,
+      transform       .13s var(--pop);
+  }
+  .key:active { transform:scale(.96); }
+  .key.pulse { animation:keyPulse .22s ease; }
+  @keyframes keyPulse { 0%{transform:scale(1)} 35%{transform:scale(.93)} 100%{transform:scale(1)} }
+
+  .wkey { height:100%; border:1.5px solid #26262e; border-radius:0 0 8px 8px; }
   .wkey.keep {
-    background: linear-gradient(180deg, #fafafa, #e4e4e7);
-    box-shadow: inset 0 -4px 12px rgba(0,0,0,0.08);
+    background:linear-gradient(180deg,#fafafa,#dedee4);
+    box-shadow: inset 0 -7px 16px rgba(0,0,0,.07), inset 0 1px 0 #fff;
+    color:#26262e;
   }
   .wkey.ban {
-    background: linear-gradient(180deg, #dc2626, #b91c1c);
-    box-shadow: inset 0 -4px 12px rgba(0,0,0,0.3);
+    background:linear-gradient(180deg,#4a242a,#311519);
+    box-shadow: inset 0 7px 16px rgba(0,0,0,.45);
+    color:#d98a90; border-color:#3a1c20;
   }
-  .wkey .note-name {
-    font-size: 14px;
-    font-weight: 700;
-  }
-  .wkey.keep .note-name { color: #27272a; }
-  .wkey.ban  .note-name { color: #fecaca; }
-  .wkey .ban-label {
-    font-size: 9px;
-    font-weight: 700;
-    color: #fca5a5;
-    letter-spacing: 0.1em;
-    margin-top: 1px;
-  }
+  .wkey.keep:hover { filter:brightness(1.03); }
 
-  .bkey {
-    position: absolute;
-    height: 60%;
-    border: 1.5px solid #09090b;
-    border-top: none;
-    border-radius: 0 0 5px 5px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding-bottom: 5px;
-    z-index: 2;
-    transition: background 0.15s ease;
-  }
+  .bkey { height:62%; border:1.5px solid #050507; border-top:none; border-radius:0 0 6px 6px; z-index:2; }
   .bkey.keep {
-    background: linear-gradient(180deg, #27272a, #18181b);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    background:linear-gradient(180deg,#30303b,#15151e);
+    box-shadow:0 5px 12px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07);
+    color:#9a9aa6;
   }
   .bkey.ban {
-    background: linear-gradient(180deg, #991b1b, #7f1d1d);
-    box-shadow: 0 2px 8px rgba(153,27,27,0.5);
+    background:linear-gradient(180deg,#3c1d23,#210f13);
+    box-shadow:inset 0 5px 12px rgba(0,0,0,.55);
+    color:#c97a82;
   }
-  .bkey .note-name { font-size: 10px; font-weight: 700; }
-  .bkey.keep .note-name { color: #71717a; }
-  .bkey.ban  .note-name { color: #fca5a5; }
-  .bkey .ban-label {
-    font-size: 8px;
-    font-weight: 700;
-    color: #f87171;
-    letter-spacing: 0.08em;
-    margin-top: 1px;
+
+  .note-name { position:absolute; left:0; right:0; bottom:10px; text-align:center; font-size:14px; font-weight:700; }
+  .bkey .note-name { bottom:8px; font-size:10px; }
+  .ban-x { position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:11px; font-weight:800; color:#c46b72; }
+  .bkey .ban-x { display:none; }
+  .key.keep .ban-x { display:none; }
+  .root-dot {
+    position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    width:7px; height:7px; border-radius:50%; background:var(--accent);
+    box-shadow:0 0 10px var(--accent); opacity:0; transition:opacity .3s;
   }
+  .bkey .root-dot { top:6px; width:6px; height:6px; }
+  .key.root .root-dot { opacity:1; }
 
   /* --- Legend --- */
-  .legend {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 26px;
-    font-size: 12px;
-    color: #71717a;
-  }
-  .legend span { display: flex; align-items: center; gap: 6px; }
-  .legend .dot {
-    width: 12px; height: 12px;
-    border-radius: 3px;
-    display: inline-block;
-  }
-  .dot-keep { background: #e4e4e7; border: 1px solid #3f3f46; }
-  .dot-ban  { background: #dc2626; }
+  .legend { display:flex; gap:22px; margin-bottom:24px; font-size:12px; color:var(--muted); }
+  .legend span { display:flex; align-items:center; gap:7px; }
+  .dot { width:13px; height:13px; border-radius:4px; display:inline-block; }
+  .dot-keep { background:linear-gradient(180deg,#fafafa,#dedee4); border:1px solid #3f3f46; }
+  .dot-ban  { background:linear-gradient(180deg,#4a242a,#311519); border:1px solid #3a1c20; }
+  .dot-root { background:var(--accent); box-shadow:0 0 8px var(--accent); border-radius:50%; width:11px; height:11px; }
 
   /* --- Summary --- */
-  .summary {
-    width: 100%;
-    max-width: 520px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+  .summary { width:100%; max-width:540px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .card {
-    background: #111116;
-    border-radius: 10px;
-    padding: 14px 14px;
+    border-radius:14px; padding:14px;
+    background:rgba(255,255,255,.025);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    border:1px solid var(--line);
   }
-  .card-keep { border: 1px solid #1e3a2f; }
-  .card-ban  { border: 1px solid #3b1517; }
-  .card-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-bottom: 10px;
-  }
-  .card-keep .card-title { color: #4ade80; }
-  .card-ban  .card-title { color: #f87171; }
-  .card .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .card-keep { border-color:rgba(52,211,153,.22); }
+  .card-ban  { border-color:rgba(176,74,82,.28); }
+  .card-title { font-size:11px; font-weight:700; letter-spacing:.04em; margin-bottom:11px; }
+  .card-keep .card-title { color:#6ee7b7; }
+  .card-ban  .card-title { color:#e09aa0; }
+  .card .tags { display:flex; flex-wrap:wrap; gap:6px; }
   .tag {
-    padding: 3px 7px;
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: 600;
-    font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+    padding:3px 8px; border-radius:6px; font-size:12.5px; font-weight:600;
+    font-family:"SF Mono","Cascadia Code",Consolas,monospace;
   }
-  .tag-keep { background: #052e16; color: #86efac; border: 1px solid #14532d; }
-  .tag-ban  { background: #2a0a0a; color: #fca5a5; border: 1px solid #450a0a; }
+  .tag-keep { background:rgba(52,211,153,.1); color:#86efac; border:1px solid rgba(52,211,153,.22); }
+  .tag-ban  { background:rgba(176,74,82,.12); color:#e0a3a8; border:1px solid rgba(176,74,82,.28); }
+  .tag.is-root { box-shadow:0 0 0 1px var(--accent) inset; color:#bbf7d0; }
 
-  .footer {
-    font-size: 11px;
-    color: #3f3f46;
-    margin-top: 26px;
-    text-align: center;
+  .footer { font-size:11px; color:#3f3f46; margin-top:26px; text-align:center; line-height:1.6; }
+
+  /* --- Toast --- */
+  .toast {
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(18px);
+    background:rgba(20,20,26,.96); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    border:1px solid var(--line); color:var(--text); padding:11px 18px; border-radius:11px;
+    font-size:13px; max-width:90vw; opacity:0; pointer-events:none; z-index:50;
+    transition:opacity .25s, transform .25s var(--ease);
   }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-  /* Mobile tweaks */
-  @media (max-width: 400px) {
-    .header h1 { font-size: 17px; }
-    .key-display .root { font-size: 26px; }
-    .key-display .scale-name { font-size: 14px; margin-left: 6px; }
-    .wkey .note-name { font-size: 12px; }
-    .bkey .note-name { font-size: 9px; }
-    .wkey .ban-label { font-size: 8px; }
-    .bkey .ban-label { font-size: 7px; }
-    .tag { font-size: 11px; padding: 2px 6px; }
-    .summary { gap: 8px; }
-    .card { padding: 12px 10px; }
+  @media (max-width: 420px) {
+    .header h1 { font-size:16px; }
+    .key-display .root { font-size:27px; }
+    .key-display .scale-name { font-size:13px; margin-left:6px; }
+    .note-name { font-size:12px; }
+    .bkey .note-name { font-size:9px; }
+    .tag { font-size:11.5px; padding:2px 6px; }
+    .summary { gap:8px; }
+    .card { padding:12px 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition:none !important; animation:none !important; }
   }
 </style>
 </head>
@@ -239,7 +209,7 @@
 
 <div class="header">
   <h1>AUTOTUNE SCALE HELPER</h1>
-  <p>紅色鍵 = 在 AutoTune 中要關掉的音</p>
+  <p>暗紅鍵 = 在 AutoTune 中要關掉的音 ・ 點任意鍵試聽</p>
 </div>
 
 <div class="selectors">
@@ -258,11 +228,19 @@
   <span class="scale-name" id="dispScale"></span>
 </div>
 
-<div class="piano-wrap" id="piano"></div>
+<div class="actions">
+  <button class="btn btn-primary" id="playBtn">▶ 播放音階</button>
+  <button class="btn" id="copyBtn">⧉ 複製 BAN 清單</button>
+</div>
+
+<div class="piano-case">
+  <div class="piano-wrap" id="piano"></div>
+</div>
 
 <div class="legend">
   <span><span class="dot dot-keep"></span>保留</span>
-  <span><span class="dot dot-ban"></span>BAN</span>
+  <span><span class="dot dot-ban"></span>關閉 (BAN)</span>
+  <span><span class="dot dot-root"></span>根音</span>
 </div>
 
 <div class="summary">
@@ -276,105 +254,246 @@
   </div>
 </div>
 
-<p class="footer">在 AutoTune 的 Scale 設定中，將紅色音符對應的鍵取消勾選</p>
+<p class="footer">在 AutoTune 的 Scale 設定裡，把標記為 BAN 的音取消勾選即可。<br>升降記號會依調性自動選擇（例如 F 大調顯示 B♭ 而非 A#）。</p>
+
+<div class="toast" id="toast"></div>
 
 <script>
-const N = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-const FLAT = {"C#":"D♭","D#":"E♭","F#":"G♭","G#":"A♭","A#":"B♭"};
-
+/* ---------- 音階定義：semis = 半音間隔, steps = 字母階級偏移 ---------- */
 const SCALES = {
-  "大調 Major":             [0,2,4,5,7,9,11],
-  "自然小調 Natural Minor":  [0,2,3,5,7,8,10],
-  "和聲小調 Harmonic Minor": [0,2,3,5,7,8,11],
-  "旋律小調 Melodic Minor":  [0,2,3,5,7,9,11],
-  "Dorian":                 [0,2,3,5,7,9,10],
-  "Mixolydian":             [0,2,4,5,7,9,10],
-  "Phrygian":               [0,1,3,5,7,8,10],
-  "Lydian":                 [0,2,4,6,7,9,11],
-  "大五聲 Penta. Major":    [0,2,4,7,9],
-  "小五聲 Penta. Minor":    [0,3,5,7,10],
-  "藍調 Blues":              [0,3,5,6,7,10],
+  "大調 Major":              { semis:[0,2,4,5,7,9,11], steps:[0,1,2,3,4,5,6] },
+  "自然小調 Natural Minor":  { semis:[0,2,3,5,7,8,10], steps:[0,1,2,3,4,5,6] },
+  "和聲小調 Harmonic Minor": { semis:[0,2,3,5,7,8,11], steps:[0,1,2,3,4,5,6] },
+  "旋律小調 Melodic Minor":  { semis:[0,2,3,5,7,9,11], steps:[0,1,2,3,4,5,6] },
+  "Dorian":                  { semis:[0,2,3,5,7,9,10], steps:[0,1,2,3,4,5,6] },
+  "Mixolydian":              { semis:[0,2,4,5,7,9,10], steps:[0,1,2,3,4,5,6] },
+  "Phrygian":                { semis:[0,1,3,5,7,8,10], steps:[0,1,2,3,4,5,6] },
+  "Lydian":                  { semis:[0,2,4,6,7,9,11], steps:[0,1,2,3,4,5,6] },
+  "大調五聲 Major Penta.":   { semis:[0,2,4,7,9],       steps:[0,1,2,4,5] },
+  "小調五聲 Minor Penta.":   { semis:[0,3,5,7,10],      steps:[0,2,3,4,6] },
+  "藍調 Blues":              { semis:[0,3,5,6,7,10],    steps:[0,2,3,4,4,6] },
 };
 
-const WHITE = [0,2,4,5,7,9,11];
-const BLACK = [1,3,6,8,10];
-const BK_POS = [0.7,1.7,3.7,4.7,5.7];
-const WW = 100 / 7;
+const LETTERS  = ['C','D','E','F','G','A','B'];
+const LETTER_PC = [0,2,4,5,7,9,11];
+const SHARPN = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const FLATN  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const ROOT_LABELS = ['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'];
 
-const $root  = document.getElementById("root");
-const $scale = document.getElementById("scale");
-
-// Populate selects
-N.forEach((n, i) => {
-  const o = document.createElement("option");
-  o.value = i;
-  o.textContent = FLAT[n] ? n + " / " + FLAT[n] : n;
-  $root.appendChild(o);
-});
-Object.keys(SCALES).forEach(s => {
-  const o = document.createElement("option");
-  o.value = s;
-  o.textContent = s;
-  $scale.appendChild(o);
-});
-
-function shortLabel(n) { return FLAT[n] ? n + "/" + FLAT[n] : n; }
-
-function render() {
-  const root = +$root.value;
-  const scaleName = $scale.value;
-  const intervals = SCALES[scaleName];
-  const active = new Set(intervals.map(i => (root + i) % 12));
-
-  // Display
-  document.getElementById("dispRoot").textContent = N[root];
-  document.getElementById("dispScale").textContent = scaleName;
-
-  // Piano
-  const piano = document.getElementById("piano");
-  piano.innerHTML = "";
-
-  WHITE.forEach((ni, i) => {
-    const ban = !active.has(ni);
-    const el = document.createElement("div");
-    el.className = "wkey " + (ban ? "ban" : "keep");
-    el.style.left = (i * WW) + "%";
-    el.style.width = WW + "%";
-    el.innerHTML =
-      '<span class="note-name">' + N[ni] + '</span>' +
-      (ban ? '<span class="ban-label">BAN</span>' : '');
-    piano.appendChild(el);
-  });
-
-  BLACK.forEach((ni, i) => {
-    const ban = !active.has(ni);
-    const el = document.createElement("div");
-    el.className = "bkey " + (ban ? "ban" : "keep");
-    el.style.left = (BK_POS[i] * WW) + "%";
-    el.style.width = (WW * 0.58) + "%";
-    el.innerHTML =
-      '<span class="note-name">' + N[ni] + '</span>' +
-      (ban ? '<span class="ban-label">BAN</span>' : '');
-    piano.appendChild(el);
-  });
-
-  // Summary
-  const keepNotes = [], banNotes = [];
-  for (let i = 0; i < 12; i++) {
-    (active.has(i) ? keepNotes : banNotes).push(i);
+/* ---------- 升降記號正確化（字母循環 + 最少臨時記號）---------- */
+function signedDiff(target, natural) {
+  let d = ((target - natural) % 12 + 12) % 12;
+  if (d > 6) d -= 12;
+  return d;
+}
+function accStr(n) {
+  if (n === 0) return '';
+  return n > 0 ? '♯'.repeat(n) : '♭'.repeat(-n);
+}
+function spellScale(rootPc, scale) {
+  let best = null;
+  for (let li = 0; li < 7; li++) {
+    const rootAcc = signedDiff(rootPc, LETTER_PC[li]);
+    if (Math.abs(rootAcc) > 2) continue;
+    let total = 0, ok = true;
+    const notes = [];
+    for (let k = 0; k < scale.semis.length; k++) {
+      const pc = (rootPc + scale.semis[k]) % 12;
+      const letterIdx = (li + scale.steps[k]) % 7;
+      const acc = signedDiff(pc, LETTER_PC[letterIdx]);
+      if (Math.abs(acc) > 2) { ok = false; break; }
+      total += Math.abs(acc);
+      notes.push({ pc, acc, name: LETTERS[letterIdx] + accStr(acc) });
+    }
+    if (!ok) continue;
+    const score = total * 10 + (rootAcc < 0 ? 1 : 0); // 平手時偏好升記號
+    if (!best || score < best.score) {
+      best = { score, rootName: LETTERS[li] + accStr(rootAcc), notes };
+    }
   }
-
-  document.getElementById("keepTitle").textContent = "✓ 保留（" + keepNotes.length + "）";
-  document.getElementById("banTitle").textContent  = "✗ BAN（" + banNotes.length + "）";
-
-  document.getElementById("keepTags").innerHTML = keepNotes
-    .map(i => '<span class="tag tag-keep">' + shortLabel(N[i]) + '</span>').join("");
-  document.getElementById("banTags").innerHTML = banNotes
-    .map(i => '<span class="tag tag-ban">' + shortLabel(N[i]) + '</span>').join("");
+  if (!best) { // 理論上不會發生的保底
+    best = { rootName: SHARPN[rootPc],
+             notes: scale.semis.map(s => { const pc = (rootPc + s) % 12; return { pc, acc:0, name: SHARPN[pc] }; }) };
+  }
+  return best;
+}
+function buildLabels(rootPc, scale) {
+  const spell = spellScale(rootPc, scale);
+  const scalePcs = new Set(spell.notes.map(n => n.pc));
+  let sharps = 0, flats = 0;
+  spell.notes.forEach(n => { if (n.acc > 0) sharps++; else if (n.acc < 0) flats++; });
+  const pref = flats > sharps ? 'flat' : 'sharp';
+  const labels = {};
+  for (let pc = 0; pc < 12; pc++) {
+    const white = LETTER_PC.includes(pc);
+    labels[pc] = white ? SHARPN[pc] : (pref === 'flat' ? FLATN[pc] : SHARPN[pc]);
+  }
+  spell.notes.forEach(n => { if (!LETTER_PC.includes(n.pc)) labels[n.pc] = n.name; });
+  return { labels, scalePcs, rootName: spell.rootName };
 }
 
-$root.addEventListener("change", render);
-$scale.addEventListener("change", render);
+/* ---------- 音訊（Web Audio，首次互動才啟動）---------- */
+let actx = null, master = null;
+function audio() {
+  if (!actx) {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    master = actx.createGain(); master.gain.value = 0.9; master.connect(actx.destination);
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function playMidi(midi, when, dur, vel) {
+  const ac = audio(); const t0 = ac.currentTime + when;
+  const osc = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 3200; f.Q.value = 0.6;
+  osc.type = 'triangle'; osc.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vel, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(f); f.connect(g); g.connect(master);
+  osc.start(t0); osc.stop(t0 + dur + 0.05);
+}
+function flashKey(pc, delayMs) {
+  setTimeout(() => {
+    const el = keyEls[pc]; if (!el) return;
+    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+  }, delayMs);
+}
+
+/* ---------- 鍵盤（只建立一次，render 只改狀態，達成順滑掃動）---------- */
+const WHITE = [0,2,4,5,7,9,11], BLACK = [1,3,6,8,10];
+const BK_POS = [0.7,1.7,3.7,4.7,5.7], WW = 100 / 7;
+const keyEls = {};
+const piano = document.getElementById('piano');
+
+function makeKey(pc, cls) {
+  const el = document.createElement('div');
+  el.className = cls;
+  el.innerHTML = '<span class="root-dot"></span><span class="ban-x">✕</span><span class="note-name"></span>';
+  el.addEventListener('click', () => {
+    playMidi(60 + pc, 0, 0.6, 0.2);
+    if (navigator.vibrate) navigator.vibrate(8);
+    flashKey(pc, 0);
+  });
+  keyEls[pc] = el;
+  return el;
+}
+function buildPiano() {
+  piano.innerHTML = '';
+  WHITE.forEach((pc, i) => {
+    const el = makeKey(pc, 'key wkey');
+    el.style.left = (i * WW) + '%'; el.style.width = WW + '%';
+    el._frac = (i * WW) / 100; piano.appendChild(el);
+  });
+  BLACK.forEach((pc, i) => {
+    const el = makeKey(pc, 'key bkey');
+    el.style.left = (BK_POS[i] * WW) + '%'; el.style.width = (WW * 0.58) + '%';
+    el._frac = (BK_POS[i] * WW) / 100; piano.appendChild(el);
+  });
+}
+
+/* ---------- DOM 參考 ---------- */
+const rootSel = document.getElementById('root');
+const scaleSel = document.getElementById('scale');
+const dispRoot = document.getElementById('dispRoot');
+const dispScale = document.getElementById('dispScale');
+const keepTitle = document.getElementById('keepTitle');
+const banTitle  = document.getElementById('banTitle');
+const keepTags  = document.getElementById('keepTags');
+const banTags   = document.getElementById('banTags');
+const toast = document.getElementById('toast');
+
+let lastBan = [];
+
+function render() {
+  const rootPc = +rootSel.value;
+  const scaleName = scaleSel.value;
+  const scale = SCALES[scaleName];
+  const { labels, scalePcs, rootName } = buildLabels(rootPc, scale);
+
+  dispRoot.textContent = rootName;
+  dispScale.textContent = scaleName;
+
+  for (let pc = 0; pc < 12; pc++) {
+    const el = keyEls[pc]; if (!el) continue;
+    const isScale = scalePcs.has(pc);
+    el.classList.toggle('keep', isScale);
+    el.classList.toggle('ban', !isScale);
+    el.classList.toggle('root', pc === rootPc);
+    el.querySelector('.note-name').textContent = labels[pc];
+    const d = Math.round(el._frac * 200);        // 左→右 掃動延遲
+    el.style.transitionDelay = d + 'ms, ' + d + 'ms, ' + d + 'ms, 0ms';
+  }
+
+  const keep = [], ban = [];
+  for (let i = 0; i < 12; i++) {
+    const pc = (rootPc + i) % 12;
+    (scalePcs.has(pc) ? keep : ban).push(pc);
+  }
+  keepTitle.textContent = '✓ 保留 ' + keep.length + ' 音';
+  banTitle.textContent  = '✕ 關閉 ' + ban.length + ' 音';
+  keepTags.innerHTML = keep.map(pc =>
+    '<span class="tag tag-keep' + (pc === rootPc ? ' is-root' : '') + '">' + labels[pc] + '</span>').join('');
+  banTags.innerHTML = ban.map(pc =>
+    '<span class="tag tag-ban">' + labels[pc] + '</span>').join('');
+  lastBan = ban.map(pc => labels[pc]);
+
+  try {
+    localStorage.setItem('ats_root', rootPc);
+    localStorage.setItem('ats_scale', scaleName);
+  } catch (e) {}
+}
+
+function playScaleArp() {
+  audio();
+  const rootPc = +rootSel.value, scale = SCALES[scaleSel.value];
+  const base = 60 + rootPc, step = 0.155;
+  scale.semis.forEach((s, i) => {
+    playMidi(base + s, i * step, 0.5, 0.16);
+    flashKey((rootPc + s) % 12, i * step * 1000);
+  });
+  const n = scale.semis.length;
+  playMidi(base + 12, n * step, 0.8, 0.18);
+  flashKey(rootPc, n * step * 1000);
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  toast.textContent = msg; toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1900);
+}
+function copyBan() {
+  const text = lastBan.join('   ');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('已複製要關閉的音：' + text))
+      .catch(() => showToast('複製失敗，請手動選取'));
+  } else {
+    showToast('此瀏覽器不支援自動複製');
+  }
+}
+
+/* ---------- 事件 ---------- */
+rootSel.addEventListener('change', () => { render(); playMidi(60 + (+rootSel.value), 0, 0.5, 0.14); });
+scaleSel.addEventListener('change', render);
+document.getElementById('playBtn').addEventListener('click', playScaleArp);
+document.getElementById('copyBtn').addEventListener('click', copyBan);
+
+/* ---------- 初始化 ---------- */
+ROOT_LABELS.forEach((lab, i) => {
+  const o = document.createElement('option'); o.value = i; o.textContent = lab; rootSel.appendChild(o);
+});
+Object.keys(SCALES).forEach(s => {
+  const o = document.createElement('option'); o.value = s; o.textContent = s; scaleSel.appendChild(o);
+});
+try {
+  const sr = localStorage.getItem('ats_root'), ss = localStorage.getItem('ats_scale');
+  if (sr !== null && +sr >= 0 && +sr < 12) rootSel.value = sr;
+  if (ss && SCALES[ss]) scaleSel.value = ss;
+} catch (e) {}
+
+buildPiano();
 render();
 </script>
 </body>
