@@ -35,14 +35,10 @@
   }
   @keyframes fadeUp { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none; } }
 
-  /* --- Header --- */
   .header { text-align: center; margin-bottom: 26px; }
-  .header h1 {
-    font-size: 19px; font-weight: 700; letter-spacing: .14em; color: #f4f4f5;
-  }
+  .header h1 { font-size: 19px; font-weight: 700; letter-spacing: .14em; color: #f4f4f5; }
   .header p { font-size: 12.5px; color: var(--muted); margin-top: 7px; letter-spacing: .02em; }
 
-  /* --- Selectors --- */
   .selectors { display:flex; gap:14px; margin-bottom:26px; flex-wrap:wrap; justify-content:center; }
   .sel-group label {
     display:block; font-size:10px; color:#a1a1aa; margin-bottom:5px;
@@ -59,7 +55,6 @@
   .sel-group select:hover { border-color:#3f3f4d; }
   .sel-group select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(52,211,153,.14); }
 
-  /* --- Key display --- */
   .key-display { text-align:center; margin-bottom:18px; }
   .key-display .root {
     font-size:34px; font-weight:800; letter-spacing:.01em;
@@ -68,8 +63,7 @@
   }
   .key-display .scale-name { font-size:16px; font-weight:400; color:#9a9aa3; margin-left:9px; }
 
-  /* --- Actions --- */
-  .actions { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; justify-content:center; }
+  .actions { display:flex; justify-content:center; margin-bottom:24px; }
   .btn {
     display:inline-flex; align-items:center; gap:7px; padding:10px 17px; border-radius:11px;
     border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
@@ -110,6 +104,7 @@
   .key.pulse { animation:keyPulse .22s ease; }
   @keyframes keyPulse { 0%{transform:scale(1)} 35%{transform:scale(.93)} 100%{transform:scale(1)} }
 
+  /* --- White keys --- */
   .wkey { height:100%; border:1.5px solid #26262e; border-radius:0 0 8px 8px; }
   .wkey.keep {
     background:linear-gradient(180deg,#fafafa,#dedee4);
@@ -117,12 +112,14 @@
     color:#26262e;
   }
   .wkey.ban {
-    background:linear-gradient(180deg,#4a242a,#311519);
-    box-shadow: inset 0 7px 16px rgba(0,0,0,.45);
-    color:#d98a90; border-color:#3a1c20;
+    background:linear-gradient(180deg,#c53a41,#8a2228);
+    box-shadow: inset 0 -6px 14px rgba(0,0,0,.25), 0 0 14px rgba(197,58,65,.2);
+    color:#ffe0e2; border-color:#7a2025;
   }
   .wkey.keep:hover { filter:brightness(1.03); }
+  .wkey.ban:hover  { filter:brightness(1.08); }
 
+  /* --- Black keys --- */
   .bkey { height:62%; border:1.5px solid #050507; border-top:none; border-radius:0 0 6px 6px; z-index:2; }
   .bkey.keep {
     background:linear-gradient(180deg,#30303b,#15151e);
@@ -130,14 +127,14 @@
     color:#9a9aa6;
   }
   .bkey.ban {
-    background:linear-gradient(180deg,#3c1d23,#210f13);
-    box-shadow:inset 0 5px 12px rgba(0,0,0,.55);
-    color:#c97a82;
+    background:linear-gradient(180deg,#862530,#4e131a);
+    box-shadow:0 3px 10px rgba(0,0,0,.45), 0 0 12px rgba(134,37,48,.3);
+    color:#f0b8bc; border-color:#5a171e;
   }
 
   .note-name { position:absolute; left:0; right:0; bottom:10px; text-align:center; font-size:14px; font-weight:700; }
   .bkey .note-name { bottom:8px; font-size:10px; }
-  .ban-x { position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:11px; font-weight:800; color:#c46b72; }
+  .ban-x { position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:11px; font-weight:800; color:#ffd0d3; }
   .bkey .ban-x { display:none; }
   .key.keep .ban-x { display:none; }
   .root-dot {
@@ -153,7 +150,7 @@
   .legend span { display:flex; align-items:center; gap:7px; }
   .dot { width:13px; height:13px; border-radius:4px; display:inline-block; }
   .dot-keep { background:linear-gradient(180deg,#fafafa,#dedee4); border:1px solid #3f3f46; }
-  .dot-ban  { background:linear-gradient(180deg,#4a242a,#311519); border:1px solid #3a1c20; }
+  .dot-ban  { background:linear-gradient(180deg,#c53a41,#8a2228); border:1px solid #7a2025; }
   .dot-root { background:var(--accent); box-shadow:0 0 8px var(--accent); border-radius:50%; width:11px; height:11px; }
 
   /* --- Summary --- */
@@ -165,30 +162,20 @@
     border:1px solid var(--line);
   }
   .card-keep { border-color:rgba(52,211,153,.22); }
-  .card-ban  { border-color:rgba(176,74,82,.28); }
+  .card-ban  { border-color:rgba(197,58,65,.28); }
   .card-title { font-size:11px; font-weight:700; letter-spacing:.04em; margin-bottom:11px; }
   .card-keep .card-title { color:#6ee7b7; }
-  .card-ban  .card-title { color:#e09aa0; }
+  .card-ban  .card-title { color:#f0a0a5; }
   .card .tags { display:flex; flex-wrap:wrap; gap:6px; }
   .tag {
     padding:3px 8px; border-radius:6px; font-size:12.5px; font-weight:600;
     font-family:"SF Mono","Cascadia Code",Consolas,monospace;
   }
   .tag-keep { background:rgba(52,211,153,.1); color:#86efac; border:1px solid rgba(52,211,153,.22); }
-  .tag-ban  { background:rgba(176,74,82,.12); color:#e0a3a8; border:1px solid rgba(176,74,82,.28); }
+  .tag-ban  { background:rgba(197,58,65,.12); color:#f0b0b5; border:1px solid rgba(197,58,65,.25); }
   .tag.is-root { box-shadow:0 0 0 1px var(--accent) inset; color:#bbf7d0; }
 
   .footer { font-size:11px; color:#3f3f46; margin-top:26px; text-align:center; line-height:1.6; }
-
-  /* --- Toast --- */
-  .toast {
-    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(18px);
-    background:rgba(20,20,26,.96); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-    border:1px solid var(--line); color:var(--text); padding:11px 18px; border-radius:11px;
-    font-size:13px; max-width:90vw; opacity:0; pointer-events:none; z-index:50;
-    transition:opacity .25s, transform .25s var(--ease);
-  }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   @media (max-width: 420px) {
     .header h1 { font-size:16px; }
@@ -209,7 +196,7 @@
 
 <div class="header">
   <h1>AUTOTUNE SCALE HELPER</h1>
-  <p>暗紅鍵 = 在 AutoTune 中要關掉的音 ・ 點任意鍵試聽</p>
+  <p>紅色鍵 = 在 AutoTune 中要關掉的音 ・ 點任意鍵試聽</p>
 </div>
 
 <div class="selectors">
@@ -230,7 +217,6 @@
 
 <div class="actions">
   <button class="btn btn-primary" id="playBtn">▶ 播放音階</button>
-  <button class="btn" id="copyBtn">⧉ 複製 BAN 清單</button>
 </div>
 
 <div class="piano-case">
@@ -256,10 +242,7 @@
 
 <p class="footer">在 AutoTune 的 Scale 設定裡，把標記為 BAN 的音取消勾選即可。<br>升降記號會依調性自動選擇（例如 F 大調顯示 B♭ 而非 A#）。</p>
 
-<div class="toast" id="toast"></div>
-
 <script>
-/* ---------- 音階定義：semis = 半音間隔, steps = 字母階級偏移 ---------- */
 const SCALES = {
   "大調 Major":              { semis:[0,2,4,5,7,9,11], steps:[0,1,2,3,4,5,6] },
   "自然小調 Natural Minor":  { semis:[0,2,3,5,7,8,10], steps:[0,1,2,3,4,5,6] },
@@ -280,7 +263,6 @@ const SHARPN = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 const FLATN  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const ROOT_LABELS = ['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'];
 
-/* ---------- 升降記號正確化（字母循環 + 最少臨時記號）---------- */
 function signedDiff(target, natural) {
   let d = ((target - natural) % 12 + 12) % 12;
   if (d > 6) d -= 12;
@@ -306,12 +288,12 @@ function spellScale(rootPc, scale) {
       notes.push({ pc, acc, name: LETTERS[letterIdx] + accStr(acc) });
     }
     if (!ok) continue;
-    const score = total * 10 + (rootAcc < 0 ? 1 : 0); // 平手時偏好升記號
+    const score = total * 10 + (rootAcc < 0 ? 1 : 0);
     if (!best || score < best.score) {
       best = { score, rootName: LETTERS[li] + accStr(rootAcc), notes };
     }
   }
-  if (!best) { // 理論上不會發生的保底
+  if (!best) {
     best = { rootName: SHARPN[rootPc],
              notes: scale.semis.map(s => { const pc = (rootPc + s) % 12; return { pc, acc:0, name: SHARPN[pc] }; }) };
   }
@@ -332,7 +314,7 @@ function buildLabels(rootPc, scale) {
   return { labels, scalePcs, rootName: spell.rootName };
 }
 
-/* ---------- 音訊（Web Audio，首次互動才啟動）---------- */
+/* --- Audio --- */
 let actx = null, master = null;
 function audio() {
   if (!actx) {
@@ -360,7 +342,7 @@ function flashKey(pc, delayMs) {
   }, delayMs);
 }
 
-/* ---------- 鍵盤（只建立一次，render 只改狀態，達成順滑掃動）---------- */
+/* --- Piano --- */
 const WHITE = [0,2,4,5,7,9,11], BLACK = [1,3,6,8,10];
 const BK_POS = [0.7,1.7,3.7,4.7,5.7], WW = 100 / 7;
 const keyEls = {};
@@ -392,7 +374,7 @@ function buildPiano() {
   });
 }
 
-/* ---------- DOM 參考 ---------- */
+/* --- DOM --- */
 const rootSel = document.getElementById('root');
 const scaleSel = document.getElementById('scale');
 const dispRoot = document.getElementById('dispRoot');
@@ -401,9 +383,6 @@ const keepTitle = document.getElementById('keepTitle');
 const banTitle  = document.getElementById('banTitle');
 const keepTags  = document.getElementById('keepTags');
 const banTags   = document.getElementById('banTags');
-const toast = document.getElementById('toast');
-
-let lastBan = [];
 
 function render() {
   const rootPc = +rootSel.value;
@@ -421,7 +400,7 @@ function render() {
     el.classList.toggle('ban', !isScale);
     el.classList.toggle('root', pc === rootPc);
     el.querySelector('.note-name').textContent = labels[pc];
-    const d = Math.round(el._frac * 200);        // 左→右 掃動延遲
+    const d = Math.round(el._frac * 200);
     el.style.transitionDelay = d + 'ms, ' + d + 'ms, ' + d + 'ms, 0ms';
   }
 
@@ -436,7 +415,6 @@ function render() {
     '<span class="tag tag-keep' + (pc === rootPc ? ' is-root' : '') + '">' + labels[pc] + '</span>').join('');
   banTags.innerHTML = ban.map(pc =>
     '<span class="tag tag-ban">' + labels[pc] + '</span>').join('');
-  lastBan = ban.map(pc => labels[pc]);
 
   try {
     localStorage.setItem('ats_root', rootPc);
@@ -457,30 +435,12 @@ function playScaleArp() {
   flashKey(rootPc, n * step * 1000);
 }
 
-let toastTimer = null;
-function showToast(msg) {
-  toast.textContent = msg; toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 1900);
-}
-function copyBan() {
-  const text = lastBan.join('   ');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text)
-      .then(() => showToast('已複製要關閉的音：' + text))
-      .catch(() => showToast('複製失敗，請手動選取'));
-  } else {
-    showToast('此瀏覽器不支援自動複製');
-  }
-}
-
-/* ---------- 事件 ---------- */
+/* --- Events --- */
 rootSel.addEventListener('change', () => { render(); playMidi(60 + (+rootSel.value), 0, 0.5, 0.14); });
 scaleSel.addEventListener('change', render);
 document.getElementById('playBtn').addEventListener('click', playScaleArp);
-document.getElementById('copyBtn').addEventListener('click', copyBan);
 
-/* ---------- 初始化 ---------- */
+/* --- Init --- */
 ROOT_LABELS.forEach((lab, i) => {
   const o = document.createElement('option'); o.value = i; o.textContent = lab; rootSel.appendChild(o);
 });
