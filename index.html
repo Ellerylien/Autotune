@@ -2,18 +2,19 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f4f7">
 <title>AutoTune Scale Helper</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg:        #0d0d11;
-    --accent:    #34d399;
-    --accent-d:  #10b981;
-    --text:      #e4e4e7;
-    --muted:     #71717a;
-    --line:      rgba(255,255,255,.08);
+    --bg:        #f4f4f7;
+    --accent:    #10b981;
+    --accent-d:  #059669;
+    --text:      #1f1f26;
+    --muted:     #5d5d68;
+    --line:      rgba(20,20,40,.09);
     --ease:      cubic-bezier(.22,1,.36,1);
     --pop:       cubic-bezier(.34,1.56,.64,1);
   }
@@ -22,7 +23,7 @@
     min-height: 100vh;
     min-height: 100dvh;
     background:
-      radial-gradient(1200px 500px at 50% -10%, #1a1a24 0%, transparent 60%),
+      radial-gradient(1200px 500px at 50% -10%, #e6f6ee 0%, transparent 60%),
       var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
@@ -36,105 +37,125 @@
   @keyframes fadeUp { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none; } }
 
   .header { text-align: center; margin-bottom: 26px; }
-  .header h1 { font-size: 19px; font-weight: 700; letter-spacing: .14em; color: #f4f4f5; }
+  .header h1 { font-size: 19px; font-weight: 700; letter-spacing: .14em; color: #1a1a20; }
   .header p { font-size: 12.5px; color: var(--muted); margin-top: 7px; letter-spacing: .02em; }
 
   .selectors { display:flex; gap:14px; margin-bottom:26px; flex-wrap:wrap; justify-content:center; }
   .sel-group label {
-    display:block; font-size:10px; color:#a1a1aa; margin-bottom:5px;
+    display:block; font-size:10px; color:#6e6e79; margin-bottom:5px;
     text-transform:uppercase; letter-spacing:.14em;
   }
   .sel-group select {
-    background:#16161d; border:1px solid #2a2a36; border-radius:9px; color:var(--text);
+    background:#ffffff; border:1px solid #d6d6df; border-radius:9px; color:var(--text);
     padding:9px 34px 9px 15px; font-size:16px; font-weight:600; cursor:pointer; outline:none;
     min-width:130px; -webkit-appearance:none; appearance:none;
+    box-shadow:0 1px 2px rgba(15,15,30,.05);
     transition: border-color .2s, box-shadow .2s, background .2s;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2371717a' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 5h10z'/%3E%3C/svg%3E");
     background-repeat:no-repeat; background-position:right 12px center;
   }
-  .sel-group select:hover { border-color:#3f3f4d; }
-  .sel-group select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(52,211,153,.14); }
+  .sel-group select:hover { border-color:#b8b8c4; }
+  .sel-group select:focus { border-color:var(--accent-d); box-shadow:0 0 0 3px rgba(16,185,129,.16); }
 
   .key-display { text-align:center; margin-bottom:18px; }
   .key-display .root {
     font-size:34px; font-weight:800; letter-spacing:.01em;
-    background:linear-gradient(180deg,#ffffff,#c2c2cc);
+    background:linear-gradient(180deg,#2c2c34,#0f0f15);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .key-display .scale-name { font-size:16px; font-weight:400; color:#9a9aa3; margin-left:9px; }
+  .key-display .scale-name { font-size:16px; font-weight:400; color:#5d5d68; margin-left:9px; }
 
   .actions { display:flex; justify-content:center; margin-bottom:24px; }
   .btn {
     display:inline-flex; align-items:center; gap:7px; padding:10px 17px; border-radius:11px;
-    border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text);
+    border:1px solid #e0e0e8; background:#ffffff; color:#3a3a44;
     font-size:13px; font-weight:600; cursor:pointer;
+    box-shadow:0 1px 2px rgba(15,15,30,.05);
+    touch-action:manipulation; user-select:none; -webkit-user-select:none;
     transition: transform .13s var(--pop), background .2s, border-color .2s, box-shadow .2s;
   }
-  .btn:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); }
+  .btn:hover { background:#fafafb; border-color:#c9c9d4; }
   .btn:active { transform:scale(.95); }
+  .btn:disabled { cursor:default; }
   .btn-primary {
     background:linear-gradient(180deg,var(--accent),var(--accent-d)); color:#04150f; border:none;
-    box-shadow:0 4px 16px rgba(16,185,129,.32);
+    box-shadow:0 4px 16px rgba(5,150,105,.3);
   }
-  .btn-primary:hover { box-shadow:0 6px 20px rgba(16,185,129,.42); }
+  .btn-primary:hover { box-shadow:0 6px 20px rgba(5,150,105,.4); }
+  .btn:focus-visible, .sel-group select:focus-visible {
+    outline:2px solid var(--accent-d); outline-offset:2px;
+  }
+  .btn .eq { display:none; align-items:flex-end; gap:2.5px; height:12px; }
+  .btn.playing .eq { display:inline-flex; }
+  .btn.playing .play-ico { display:none; }
+  .btn .eq i { width:3px; height:5px; background:#04150f; border-radius:1.5px; animation:eqBar .55s ease-in-out infinite; }
+  .btn .eq i:nth-child(2) { animation-delay:.18s; }
+  .btn .eq i:nth-child(3) { animation-delay:.36s; }
+  @keyframes eqBar { 0%,100%{height:4px} 50%{height:12px} }
 
   /* --- Piano case --- */
   .piano-case {
     width:100%; max-width:540px; padding:12px 12px 14px; border-radius:18px;
-    background:linear-gradient(180deg,#1c1c24,#101016);
-    border:1px solid rgba(255,255,255,.05);
-    box-shadow: 0 22px 50px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05);
+    background:linear-gradient(180deg,#ffffff,#e7e7ee);
+    border:1px solid rgba(15,15,30,.08);
+    box-shadow: 0 22px 50px -20px rgba(15,15,40,.28), inset 0 1px 0 #ffffff;
     margin-bottom:14px;
   }
   .piano-case::before {
     content:""; display:block; height:3px; border-radius:3px; margin-bottom:11px;
-    background:linear-gradient(90deg, transparent, rgba(52,211,153,.5), transparent);
+    background:linear-gradient(90deg, transparent, rgba(16,185,129,.45), transparent);
   }
   .piano-wrap { position:relative; width:100%; aspect-ratio: 540 / 184; }
+  .piano-case.applied { animation:caseGlow .9s var(--ease); }
+  @keyframes caseGlow {
+    0% { box-shadow:0 22px 50px -20px rgba(15,15,40,.28), 0 0 0 1px rgba(5,150,105,.5), 0 0 32px rgba(16,185,129,.3); }
+    100% { box-shadow:0 22px 50px -20px rgba(15,15,40,.28), inset 0 1px 0 #ffffff; }
+  }
 
   .key {
     position:absolute; top:0; user-select:none; cursor:pointer; transform-origin:bottom center;
+    touch-action:manipulation;
     transition:
       background-color .45s var(--ease),
       box-shadow      .45s var(--ease),
-      color           .45s ease,
-      transform       .13s var(--pop);
+      color           .45s ease;
   }
   .key:active { transform:scale(.96); }
+  .key:focus-visible { outline:2px solid var(--accent-d); outline-offset:-2px; z-index:3; }
   .key.pulse { animation:keyPulse .22s ease; }
   @keyframes keyPulse { 0%{transform:scale(1)} 35%{transform:scale(.93)} 100%{transform:scale(1)} }
 
   /* --- White keys --- */
-  .wkey { height:100%; border:1.5px solid #26262e; border-radius:0 0 8px 8px; }
+  .wkey { height:100%; border:1.5px solid #b9b9c6; border-radius:0 0 8px 8px; }
   .wkey.keep {
-    background:linear-gradient(180deg,#fafafa,#dedee4);
-    box-shadow: inset 0 -7px 16px rgba(0,0,0,.07), inset 0 1px 0 #fff;
-    color:#26262e;
+    background:linear-gradient(180deg,#ffffff,#eceff3);
+    box-shadow: inset 0 -7px 16px rgba(20,20,50,.06), inset 0 1px 0 #fff;
+    color:#3a3a44;
   }
   .wkey.ban {
-    background:linear-gradient(180deg,#c53a41,#8a2228);
-    box-shadow: inset 0 -6px 14px rgba(0,0,0,.25), 0 0 14px rgba(197,58,65,.2);
-    color:#ffe0e2; border-color:#7a2025;
+    background:linear-gradient(180deg,#e35d63,#bb3038);
+    box-shadow: inset 0 -6px 14px rgba(0,0,0,.15), 0 0 14px rgba(190,45,55,.25);
+    color:#ffffff; border-color:#a8262e;
   }
-  .wkey.keep:hover { filter:brightness(1.03); }
-  .wkey.ban:hover  { filter:brightness(1.08); }
+  .wkey.keep:hover { filter:brightness(.97); }
+  .wkey.ban:hover  { filter:brightness(1.05); }
 
   /* --- Black keys --- */
-  .bkey { height:62%; border:1.5px solid #050507; border-top:none; border-radius:0 0 6px 6px; z-index:2; }
+  .bkey { height:62%; border:1.5px solid #1a1a24; border-top:none; border-radius:0 0 6px 6px; z-index:2; }
   .bkey.keep {
-    background:linear-gradient(180deg,#30303b,#15151e);
-    box-shadow:0 5px 12px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07);
-    color:#9a9aa6;
+    background:linear-gradient(180deg,#3d3d49,#20202b);
+    box-shadow:0 5px 12px rgba(20,20,50,.35), inset 0 1px 0 rgba(255,255,255,.12);
+    color:#c9c9d4;
   }
   .bkey.ban {
-    background:linear-gradient(180deg,#862530,#4e131a);
-    box-shadow:0 3px 10px rgba(0,0,0,.45), 0 0 12px rgba(134,37,48,.3);
-    color:#f0b8bc; border-color:#5a171e;
+    background:linear-gradient(180deg,#93262f,#5c161d);
+    box-shadow:0 4px 10px rgba(20,20,50,.3), 0 0 12px rgba(147,38,48,.25);
+    color:#f5c0c4; border-color:#6e1b22;
   }
 
   .note-name { position:absolute; left:0; right:0; bottom:10px; text-align:center; font-size:14px; font-weight:700; }
   .bkey .note-name { bottom:8px; font-size:10px; }
-  .ban-x { position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:11px; font-weight:800; color:#ffd0d3; }
+  .ban-x { position:absolute; left:0; right:0; bottom:28px; text-align:center; font-size:11px; font-weight:800; color:#ffe4e6; }
   .bkey .ban-x { display:none; }
   .key.keep .ban-x { display:none; }
   .root-dot {
@@ -149,33 +170,79 @@
   .legend { display:flex; gap:22px; margin-bottom:24px; font-size:12px; color:var(--muted); }
   .legend span { display:flex; align-items:center; gap:7px; }
   .dot { width:13px; height:13px; border-radius:4px; display:inline-block; }
-  .dot-keep { background:linear-gradient(180deg,#fafafa,#dedee4); border:1px solid #3f3f46; }
-  .dot-ban  { background:linear-gradient(180deg,#c53a41,#8a2228); border:1px solid #7a2025; }
+  .dot-keep { background:linear-gradient(180deg,#ffffff,#eceff3); border:1px solid #b9b9c6; }
+  .dot-ban  { background:linear-gradient(180deg,#e35d63,#bb3038); border:1px solid #a8262e; }
   .dot-root { background:var(--accent); box-shadow:0 0 8px var(--accent); border-radius:50%; width:11px; height:11px; }
 
   /* --- Summary --- */
   .summary { width:100%; max-width:540px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .card {
     border-radius:14px; padding:14px;
-    background:rgba(255,255,255,.025);
-    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    background:#ffffff;
     border:1px solid var(--line);
+    box-shadow:0 1px 2px rgba(15,15,30,.04), 0 12px 32px -24px rgba(15,15,30,.2);
   }
-  .card-keep { border-color:rgba(52,211,153,.22); }
-  .card-ban  { border-color:rgba(197,58,65,.28); }
+  .card-keep { border-color:rgba(5,150,105,.3); }
+  .card-ban  { border-color:rgba(190,45,55,.3); }
   .card-title { font-size:11px; font-weight:700; letter-spacing:.04em; margin-bottom:11px; }
-  .card-keep .card-title { color:#6ee7b7; }
-  .card-ban  .card-title { color:#f0a0a5; }
+  .card-keep .card-title { color:#047857; }
+  .card-ban  .card-title { color:#b91c1c; }
   .card .tags { display:flex; flex-wrap:wrap; gap:6px; }
   .tag {
     padding:3px 8px; border-radius:6px; font-size:12.5px; font-weight:600;
     font-family:"SF Mono","Cascadia Code",Consolas,monospace;
   }
-  .tag-keep { background:rgba(52,211,153,.1); color:#86efac; border:1px solid rgba(52,211,153,.22); }
-  .tag-ban  { background:rgba(197,58,65,.12); color:#f0b0b5; border:1px solid rgba(197,58,65,.25); }
-  .tag.is-root { box-shadow:0 0 0 1px var(--accent) inset; color:#bbf7d0; }
+  .tag-keep { background:rgba(16,185,129,.1); color:#047857; border:1px solid rgba(5,150,105,.28); }
+  .tag-ban  { background:rgba(220,38,38,.08); color:#b91c1c; border:1px solid rgba(190,45,55,.28); }
+  .tag.is-root { box-shadow:0 0 0 1px var(--accent-d) inset; color:#065f46; }
 
-  .footer { font-size:11px; color:#3f3f46; margin-top:26px; text-align:center; line-height:1.6; }
+  /* --- Setlist --- */
+  .setlist { width:100%; max-width:540px; margin-top:26px; }
+  .setlist-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:9px; }
+  .setlist-head label { font-size:10px; color:#6e6e79; text-transform:uppercase; letter-spacing:.14em; font-weight:700; }
+  .setlist-head .hint { font-size:11px; color:var(--muted); }
+  #setlistInput {
+    width:100%; min-height:96px; resize:vertical; display:block;
+    background:#ffffff; border:1px solid #d6d6df; border-radius:12px; color:var(--text);
+    padding:12px 14px; font-size:16px; line-height:1.55; font-family:inherit; outline:none;
+    box-shadow:0 1px 2px rgba(15,15,30,.05);
+    transition:border-color .2s, box-shadow .2s;
+  }
+  #setlistInput:hover { border-color:#b8b8c4; }
+  #setlistInput:focus { border-color:var(--accent-d); box-shadow:0 0 0 3px rgba(16,185,129,.16); }
+  #setlistInput::placeholder { color:#a3a3ad; }
+  .setlist-actions { display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .setlist-status { margin-left:auto; font-size:12px; color:var(--muted); text-align:right; }
+  .songs { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .song {
+    display:block; width:100%; text-align:left; cursor:pointer; touch-action:manipulation;
+    border-radius:14px; padding:12px 14px; border:1px solid #e3e3ea;
+    background:#ffffff; color:var(--text); font:inherit;
+    box-shadow:0 1px 2px rgba(15,15,30,.04), 0 12px 32px -24px rgba(15,15,30,.2);
+    transition:transform .13s var(--pop), border-color .2s, background .2s, box-shadow .2s;
+  }
+  .song:hover { background:#fbfbfc; border-color:#cdcdd8; }
+  .song:active { transform:scale(.985); }
+  .song:focus-visible { outline:2px solid var(--accent-d); outline-offset:2px; }
+  .song.active { border-color:rgba(5,150,105,.55); background:#f2fbf7; }
+  .song.active .song-key { border-color:rgba(5,150,105,.6); box-shadow:0 0 14px rgba(16,185,129,.22); }
+  .song-top { display:flex; align-items:center; gap:12px; }
+  .song-info { flex:1; min-width:0; }
+  .song-title { font-size:14px; font-weight:700; line-height:1.35; }
+  .song-meta { font-size:11.5px; color:var(--muted); margin-top:3px; font-variant-numeric:tabular-nums; }
+  .song-key {
+    flex:none; min-width:46px; height:46px; padding:0 9px; border-radius:12px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    background:linear-gradient(180deg,#eafaf2,#d9f2e6); border:1px solid rgba(5,150,105,.3);
+    color:#047857; font-size:17px; font-weight:800; line-height:1;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .song-key small { font-size:8px; font-weight:600; letter-spacing:.08em; color:#3f8e6f; }
+  .song-bans { display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-top:9px; }
+  .song-bans .lbl { font-size:10px; color:#a1555c; letter-spacing:.06em; margin-right:2px; }
+  .tag-sm { font-size:11px; padding:2px 6px; }
+
+  .footer { font-size:11px; color:#8e8e99; margin-top:26px; text-align:center; line-height:1.6; }
 
   @media (max-width: 420px) {
     .header h1 { font-size:16px; }
@@ -186,6 +253,8 @@
     .tag { font-size:11.5px; padding:2px 6px; }
     .summary { gap:8px; }
     .card { padding:12px 11px; }
+    .song-title { font-size:13px; }
+    .song-key { min-width:42px; height:42px; font-size:15px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition:none !important; animation:none !important; }
@@ -196,7 +265,6 @@
 
 <div class="header">
   <h1>AUTOTUNE SCALE HELPER</h1>
-  <p>紅色鍵 = 在 AutoTune 中要關掉的音 ・ 點任意鍵試聽</p>
 </div>
 
 <div class="selectors">
@@ -216,7 +284,11 @@
 </div>
 
 <div class="actions">
-  <button class="btn btn-primary" id="playBtn">▶ 播放音階</button>
+  <button class="btn btn-primary" id="playBtn">
+    <svg class="play-ico" width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span id="playLabel">播放音階</span>
+  </button>
 </div>
 
 <div class="piano-case">
@@ -240,9 +312,29 @@
   </div>
 </div>
 
-<p class="footer">在 AutoTune 的 Scale 設定裡，把標記為 BAN 的音取消勾選即可。<br>升降記號會依調性自動選擇（例如 F 大調顯示 B♭ 而非 A#）。</p>
+<div class="setlist">
+  <div class="setlist-head">
+    <label for="setlistInput">歌單解析 Setlist</label>
+    <span class="hint">貼上訊息，自動抓出曲目與調性</span>
+  </div>
+  <textarea id="setlistInput" rows="4" spellcheck="false"
+    placeholder="貼上歌單訊息，例如：&#10;Oh the Cross Oh十架 G 6/8 76&#10;Because He Lives 因祂活著 D 124&#10;The Blessing 祝福 B♭ 70*2"></textarea>
+  <div class="setlist-actions">
+    <button class="btn" id="parseBtn">解析歌單</button>
+    <button class="btn" id="clearBtn">清除</button>
+    <span class="setlist-status" id="setlistStatus" aria-live="polite"></span>
+  </div>
+  <div class="songs" id="songs"></div>
+</div>
 
+<p class="footer">在 AutoTune 的 Scale 設定裡，把標記為 BAN 的音取消勾選即可。<br>升降記號會依調性自動選擇（例如 F 大調顯示 B♭ 而非 A#）。<br>點擊歌單中的曲目卡片，即可套用該曲的調性設定。</p>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script>
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const anim = () => typeof window.gsap !== 'undefined' && !reduceMotion;
+let firstRender = true;
+
 const SCALES = {
   "大調 Major":              { semis:[0,2,4,5,7,9,11], steps:[0,1,2,3,4,5,6] },
   "自然小調 Natural Minor":  { semis:[0,2,3,5,7,8,10], steps:[0,1,2,3,4,5,6] },
@@ -338,7 +430,12 @@ function playMidi(midi, when, dur, vel) {
 function flashKey(pc, delayMs) {
   setTimeout(() => {
     const el = keyEls[pc]; if (!el) return;
-    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+    if (anim()) {
+      gsap.fromTo(el, { scale: .93 },
+        { scale: 1, duration: .3, ease: 'back.out(3)', transformOrigin: '50% 100%', overwrite: 'auto', clearProps: 'transform' });
+    } else {
+      el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+    }
   }, delayMs);
 }
 
@@ -351,11 +448,17 @@ const piano = document.getElementById('piano');
 function makeKey(pc, cls) {
   const el = document.createElement('div');
   el.className = cls;
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
   el.innerHTML = '<span class="root-dot"></span><span class="ban-x">✕</span><span class="note-name"></span>';
-  el.addEventListener('click', () => {
+  const hit = () => {
     playMidi(60 + pc, 0, 0.6, 0.2);
     if (navigator.vibrate) navigator.vibrate(8);
     flashKey(pc, 0);
+  };
+  el.addEventListener('click', hit);
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hit(); }
   });
   keyEls[pc] = el;
   return el;
@@ -383,6 +486,12 @@ const keepTitle = document.getElementById('keepTitle');
 const banTitle  = document.getElementById('banTitle');
 const keepTags  = document.getElementById('keepTags');
 const banTags   = document.getElementById('banTags');
+const playBtn   = document.getElementById('playBtn');
+const playLabel = document.getElementById('playLabel');
+const pianoCase = document.querySelector('.piano-case');
+const setlistInput  = document.getElementById('setlistInput');
+const setlistStatus = document.getElementById('setlistStatus');
+const songsEl   = document.getElementById('songs');
 
 function render() {
   const rootPc = +rootSel.value;
@@ -390,8 +499,14 @@ function render() {
   const scale = SCALES[scaleName];
   const { labels, scalePcs, rootName } = buildLabels(rootPc, scale);
 
+  const changed = dispRoot.textContent !== rootName || dispScale.textContent !== scaleName;
   dispRoot.textContent = rootName;
   dispScale.textContent = scaleName;
+  if (changed && !firstRender && anim()) {
+    gsap.fromTo([dispRoot, dispScale],
+      { y: 9, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: .4, ease: 'power3.out', stagger: .05, overwrite: 'auto', clearProps: 'all' });
+  }
 
   for (let pc = 0; pc < 12; pc++) {
     const el = keyEls[pc]; if (!el) continue;
@@ -400,8 +515,9 @@ function render() {
     el.classList.toggle('ban', !isScale);
     el.classList.toggle('root', pc === rootPc);
     el.querySelector('.note-name').textContent = labels[pc];
+    el.setAttribute('aria-label', labels[pc] + (isScale ? '，保留' : '，關閉') + (pc === rootPc ? '，根音' : ''));
     const d = Math.round(el._frac * 200);
-    el.style.transitionDelay = d + 'ms, ' + d + 'ms, ' + d + 'ms, 0ms';
+    el.style.transitionDelay = d + 'ms, ' + d + 'ms, ' + d + 'ms';
   }
 
   const keep = [], ban = [];
@@ -415,6 +531,12 @@ function render() {
     '<span class="tag tag-keep' + (pc === rootPc ? ' is-root' : '') + '">' + labels[pc] + '</span>').join('');
   banTags.innerHTML = ban.map(pc =>
     '<span class="tag tag-ban">' + labels[pc] + '</span>').join('');
+  if (changed && !firstRender && anim()) {
+    gsap.from([...keepTags.children, ...banTags.children],
+      { autoAlpha: 0, y: 6, scale: .92, duration: .28, ease: 'back.out(1.8)', stagger: .015, overwrite: 'auto', clearProps: 'all' });
+  }
+
+  syncActiveSong(rootPc, scaleName);
 
   try {
     localStorage.setItem('ats_root', rootPc);
@@ -423,6 +545,7 @@ function render() {
 }
 
 function playScaleArp() {
+  if (playBtn.disabled) return;
   audio();
   const rootPc = +rootSel.value, scale = SCALES[scaleSel.value];
   const base = 60 + rootPc, step = 0.155;
@@ -433,12 +556,150 @@ function playScaleArp() {
   const n = scale.semis.length;
   playMidi(base + 12, n * step, 0.8, 0.18);
   flashKey(rootPc, n * step * 1000);
+
+  playBtn.disabled = true;
+  playBtn.classList.add('playing');
+  playLabel.textContent = '播放中…';
+  setTimeout(() => {
+    playBtn.disabled = false;
+    playBtn.classList.remove('playing');
+    playLabel.textContent = '播放音階';
+  }, (n * step + 0.85) * 1000);
+}
+
+/* --- Setlist parser --- */
+const LETTER_TO_PC = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+const TEMPO_RE = /^\d{1,3}([\/*x×\-]\d{1,3})?(bpm)?$/i;
+
+function parseKeyToken(raw) {
+  const t = raw.replace(/^[(\[]+|[)\]]+$/g, '');
+  const m = t.match(/^([A-G])([#♯b♭])?(m|min)?$/);
+  if (!m) return null;
+  let pc = LETTER_TO_PC[m[1]], label = m[1];
+  if (m[2] === '#' || m[2] === '♯') { pc = (pc + 1) % 12; label += '♯'; }
+  else if (m[2] === 'b' || m[2] === '♭') { pc = (pc + 11) % 12; label += '♭'; }
+  const minor = !!m[3];
+  return { pc, minor, label: label + (minor ? 'm' : '') };
+}
+
+function parseSetlist(text) {
+  const out = [];
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || /https?:\/\/|youtu\.?be/i.test(line)) continue;
+    const toks = line.split(/\s+/);
+    for (let i = toks.length - 1; i >= 1; i--) {
+      const key = parseKeyToken(toks[i]);
+      if (!key) continue;
+      const rest = toks.slice(i + 1);
+      if (!rest.every(t => TEMPO_RE.test(t))) continue;
+      const title = toks.slice(0, i).join(' ').replace(/[-–—·]+$/, '').trim();
+      if (!/[A-Za-z0-9぀-ヿ一-鿿]/.test(title) || /[:：]$/.test(title)) break;
+      const meter = rest.find(t => /^\d{1,2}\/\d{1,2}$/.test(t)) || '';
+      const bpm = rest.filter(t => t !== meter).join(' ').replace(/[*x]/gi, '×');
+      out.push({ title, key, meter, bpm });
+      break;
+    }
+  }
+  return out;
+}
+
+function esc(s) {
+  return s.replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+}
+function scaleNameFor(song) {
+  return song.key.minor ? '自然小調 Natural Minor' : '大調 Major';
+}
+
+let songs = [], songsSig = '';
+
+function renderSongs(animate) {
+  songsEl.innerHTML = '';
+  songs.forEach((s, idx) => {
+    const scaleName = scaleNameFor(s);
+    const { labels, scalePcs } = buildLabels(s.key.pc, SCALES[scaleName]);
+    const bans = [];
+    for (let i = 0; i < 12; i++) {
+      const pc = (s.key.pc + i) % 12;
+      if (!scalePcs.has(pc)) bans.push(labels[pc]);
+    }
+    const metaBits = [];
+    if (s.meter) metaBits.push('拍號 ' + s.meter);
+    if (s.bpm) metaBits.push('♩ ' + s.bpm);
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'song';
+    card.dataset.idx = idx;
+    card.setAttribute('aria-label',
+      s.title + '，' + s.key.label + (s.key.minor ? ' 小調' : ' 大調') +
+      (s.bpm ? '，速度 ' + s.bpm : '') + '，點擊套用');
+    card.innerHTML =
+      '<div class="song-top">' +
+        '<div class="song-info">' +
+          '<div class="song-title">' + esc(s.title) + '</div>' +
+          (metaBits.length ? '<div class="song-meta">' + esc(metaBits.join(' · ')) + '</div>' : '') +
+        '</div>' +
+        '<div class="song-key">' + s.key.label + '<small>' + (s.key.minor ? '小調' : '大調') + '</small></div>' +
+      '</div>' +
+      '<div class="song-bans"><span class="lbl">關閉</span>' +
+        bans.map(b => '<span class="tag tag-ban tag-sm">' + b + '</span>').join('') + '</div>';
+    card.addEventListener('click', () => applySong(idx));
+    songsEl.appendChild(card);
+  });
+  if (animate && anim() && songs.length) {
+    gsap.from([...songsEl.children],
+      { autoAlpha: 0, y: 10, duration: .35, ease: 'power3.out', stagger: .05, clearProps: 'all' });
+  }
+  syncActiveSong(+rootSel.value, scaleSel.value);
+}
+
+function syncActiveSong(rootPc, scaleName) {
+  [...songsEl.children].forEach(el => {
+    const s = songs[+el.dataset.idx];
+    el.classList.toggle('active', !!s && s.key.pc === rootPc && scaleNameFor(s) === scaleName);
+  });
+}
+
+function applySong(idx) {
+  const s = songs[idx]; if (!s) return;
+  rootSel.value = s.key.pc;
+  scaleSel.value = scaleNameFor(s);
+  render();
+  playMidi(60 + s.key.pc, 0, 0.5, 0.14);
+  pianoCase.classList.remove('applied'); void pianoCase.offsetWidth; pianoCase.classList.add('applied');
+  pianoCase.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+}
+
+function updateSetlist() {
+  const text = setlistInput.value;
+  try { localStorage.setItem('ats_setlist', text); } catch (e) {}
+  const parsed = parseSetlist(text);
+  const sig = JSON.stringify(parsed);
+  if (sig !== songsSig) {
+    songsSig = sig;
+    songs = parsed;
+    renderSongs(!firstRender);
+  }
+  setlistStatus.textContent = songs.length
+    ? '偵測到 ' + songs.length + ' 首曲目'
+    : (text.trim() ? '未偵測到曲目（每行：曲名 調性 速度）' : '');
 }
 
 /* --- Events --- */
 rootSel.addEventListener('change', () => { render(); playMidi(60 + (+rootSel.value), 0, 0.5, 0.14); });
 scaleSel.addEventListener('change', render);
-document.getElementById('playBtn').addEventListener('click', playScaleArp);
+playBtn.addEventListener('click', playScaleArp);
+
+let setlistTimer;
+setlistInput.addEventListener('input', () => {
+  clearTimeout(setlistTimer);
+  setlistTimer = setTimeout(updateSetlist, 400);
+});
+document.getElementById('parseBtn').addEventListener('click', updateSetlist);
+document.getElementById('clearBtn').addEventListener('click', () => {
+  setlistInput.value = '';
+  updateSetlist();
+});
 
 /* --- Init --- */
 ROOT_LABELS.forEach((lab, i) => {
@@ -451,10 +712,27 @@ try {
   const sr = localStorage.getItem('ats_root'), ss = localStorage.getItem('ats_scale');
   if (sr !== null && +sr >= 0 && +sr < 12) rootSel.value = sr;
   if (ss && SCALES[ss]) scaleSel.value = ss;
+  const sl = localStorage.getItem('ats_setlist');
+  if (sl) setlistInput.value = sl;
 } catch (e) {}
 
 buildPiano();
 render();
+updateSetlist();
+
+if (anim()) {
+  gsap.timeline({ defaults: { ease: 'power3.out', duration: .55 } })
+    .from('.header',         { y: 14, autoAlpha: 0 })
+    .from('.sel-group',      { y: 12, autoAlpha: 0, stagger: .07 }, '-=.38')
+    .from('.key-display',    { y: 10, autoAlpha: 0 }, '-=.4')
+    .from('.actions',        { y: 10, autoAlpha: 0 }, '-=.45')
+    .from('.piano-case',     { y: 18, autoAlpha: 0, scale: .985 }, '-=.42')
+    .from('.legend',         { autoAlpha: 0 }, '-=.3')
+    .from('.summary .card',  { y: 12, autoAlpha: 0, stagger: .08 }, '-=.35')
+    .from('.setlist',        { y: 12, autoAlpha: 0 }, '-=.4')
+    .from('.footer',         { autoAlpha: 0 }, '-=.4');
+}
+firstRender = false;
 </script>
 </body>
 </html>
