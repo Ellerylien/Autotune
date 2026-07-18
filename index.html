@@ -242,6 +242,29 @@
   .song-bans .lbl { font-size:10px; color:#a1555c; letter-spacing:.06em; margin-right:2px; }
   .tag-sm { font-size:11px; padding:2px 6px; }
 
+  /* --- 手動補歌（解析不到時的保底） --- */
+  .misses { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .miss {
+    border:1.5px dashed #cfcfda; border-radius:13px; background:#fbfbfd;
+    padding:10px 12px; display:flex; flex-direction:column; gap:8px;
+  }
+  .miss.added { border-style:solid; border-color:rgba(5,150,105,.45); background:#f2fbf7; }
+  .miss-label { font-size:10px; color:#a1555c; letter-spacing:.1em; font-weight:700; }
+  .miss.added .miss-label { color:#047857; }
+  .miss-text { font-size:12.5px; color:#55555f; line-height:1.45; word-break:break-all; }
+  .miss-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .miss select, .miss input[type="text"] {
+    background:#fff; border:1px solid #d6d6df; border-radius:9px; color:var(--text);
+    padding:7px 10px; font-size:13px; font-weight:600; outline:none; max-width:100%;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .miss select:focus-visible, .miss input[type="text"]:focus-visible {
+    border-color:var(--accent-d); box-shadow:0 0 0 3px rgba(16,185,129,.16); outline:none;
+  }
+  .miss input[type="text"] { flex:1; min-width:140px; font-weight:500; }
+  .miss .btn { padding:7px 13px; font-size:12.5px; }
+  .miss-add-btn { align-self:flex-start; }
+
   .footer { font-size:11px; color:#8e8e99; margin-top:26px; text-align:center; line-height:1.6; }
 
   @media (max-width: 420px) {
@@ -325,6 +348,7 @@
     <span class="setlist-status" id="setlistStatus" aria-live="polite"></span>
   </div>
   <div class="songs" id="songs"></div>
+  <div class="misses" id="misses"></div>
 </div>
 
 <p class="footer">在 AutoTune 的 Scale 設定裡，把標記為 BAN 的音取消勾選即可。<br>升降記號會依調性自動選擇（例如 F 大調顯示 B♭ 而非 A#）。<br>點擊歌單中的曲目卡片，即可套用該曲的調性設定。</p>
@@ -492,6 +516,7 @@ const pianoCase = document.querySelector('.piano-case');
 const setlistInput  = document.getElementById('setlistInput');
 const setlistStatus = document.getElementById('setlistStatus');
 const songsEl   = document.getElementById('songs');
+const missesEl  = document.getElementById('misses');
 
 function render() {
   const rootPc = +rootSel.value;
@@ -586,10 +611,18 @@ function parseKeyToken(raw) {
 
 function parseSetlist(text) {
   const out = [];
+  const misses = []; // 疑似曲目但解析不到的行（給手動補歌用）
   let pending = ''; // 已出現但還沒等到調性的曲名（曲名與調性分行的格式）
+  let buf = [], bufNum = false; // 未配對成功的內容行；bufNum＝其中有編號行
+  const flushMiss = force => {
+    if (buf.length && (force || bufNum)) misses.push(buf.join(' '));
+    buf = []; bufNum = false;
+  };
   for (const rawLine of text.split(/\r?\n/)) {
     let line = rawLine.trim();
-    if (!line || /https?:\/\/|youtu\.?be/i.test(line)) { pending = ''; continue; }
+    if (!line) { flushMiss(false); pending = ''; continue; }
+    // URL 行：正上方沒配對成功的行，視為漏抓的曲目候選
+    if (/https?:\/\/|youtu\.?be/i.test(line)) { flushMiss(true); pending = ''; continue; }
     const numbered = /^\d{1,3}\s*[.)、．]\s*/.test(line);
     if (numbered) pending = ''; // 編號行代表新的一首歌
     line = line.replace(/^\d{1,3}\s*[.)、．]\s*/, '')
@@ -626,11 +659,16 @@ function parseSetlist(text) {
       matched = true;
       break;
     }
-    if (matched) { pending = ''; continue; }
+    if (matched) { pending = ''; buf = []; bufNum = false; continue; }
     if (numbered) pending = toks.join(' ');            // 曲名行，等下一行的調性
     else if (pending) pending += ' ' + toks.join(' '); // 曲名的延續行
+    if (/[A-Za-z0-9぀-ヿ一-鿿]/.test(line) && !/[:：]$/.test(line)) {
+      buf.push(toks.join(' '));
+      if (numbered) bufNum = true;
+    }
   }
-  return out;
+  flushMiss(false); // 檔尾：有編號的殘留行也視為漏抓（沒附連結的歌單格式）
+  return { songs: out, misses };
 }
 
 function esc(s) {
@@ -641,6 +679,129 @@ function scaleNameFor(song) {
 }
 
 let songs = [], songsSig = '';
+
+/* --- 手動補歌（解析不到時的保底） --- */
+const MANUAL_LABEL = ['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+let parsedSongs = [], missRows = [], customRows = [];
+let savedManual = [];
+try { savedManual = JSON.parse(localStorage.getItem('ats_manual') || '[]'); } catch (e) {}
+if (Array.isArray(savedManual)) {
+  customRows = savedManual.filter(r => r && r.custom && r.text && r.pc !== null);
+} else savedManual = [];
+
+function guessTempo(text) {
+  const toks = text.split(/\s+/).map(t => t.replace(/^[(\[]+|[)\]]+$/g, '')).filter(Boolean)
+    .filter(t => TEMPO_RE.test(t));
+  const meter = toks.find(t => /^\d{1,2}\/\d{1,2}$/.test(t)) || '';
+  const bpm = toks.filter(t => t !== meter).join(' ').replace(/\s*[*x×]\s*/gi, '×');
+  return { meter, bpm };
+}
+function guessTitle(text) {
+  const kept = text.split(/\s+/).filter(t => {
+    const c = t.replace(/^[(\[]+|[)\]]+$/g, '');
+    return c && !TEMPO_RE.test(c) && !/^(key|bpm|調|[\/|·-]+)$/i.test(c);
+  });
+  return kept.join(' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')')
+    .replace(/[\s\-–—·(\[]+$/, '').trim() || text.trim();
+}
+function rowToSong(r) {
+  const guess = r.custom ? { meter: '', bpm: '' } : guessTempo(r.text);
+  return {
+    title: r.custom ? r.text.trim() : guessTitle(r.text),
+    key: { pc: r.pc, minor: r.minor, label: MANUAL_LABEL[r.pc] + (r.minor ? 'm' : '') },
+    meter: guess.meter, bpm: guess.bpm, manual: true
+  };
+}
+function persistManual() {
+  savedManual = missRows.filter(r => r.added || r.pc !== null).concat(customRows)
+    .map(r => ({ text: r.text, pc: r.pc, minor: r.minor, added: r.added, custom: !!r.custom }));
+  try { localStorage.setItem('ats_manual', JSON.stringify(savedManual)); } catch (e) {}
+}
+
+function keySelect(row) {
+  const sel = document.createElement('select');
+  sel.setAttribute('aria-label', '調性');
+  const ph = document.createElement('option');
+  ph.value = ''; ph.textContent = '調性…';
+  sel.appendChild(ph);
+  [0, 1].forEach(minor => {
+    ROOT_LABELS.forEach((lab, pc) => {
+      const o = document.createElement('option');
+      o.value = pc + ',' + minor;
+      o.textContent = lab + (minor ? ' 小調' : ' 大調');
+      sel.appendChild(o);
+    });
+  });
+  if (row.pc !== null) sel.value = row.pc + ',' + (row.minor ? 1 : 0);
+  sel.addEventListener('change', () => {
+    if (!sel.value) return;
+    const parts = sel.value.split(',');
+    row.pc = +parts[0]; row.minor = parts[1] === '1';
+    if (row.added) refreshSongs(true, false);
+    else persistManual();
+  });
+  return sel;
+}
+
+function renderMisses() {
+  missesEl.innerHTML = '';
+  missRows.concat(customRows).forEach(row => {
+    const box = document.createElement('div');
+    box.className = 'miss' + (row.added ? ' added' : '');
+    const lbl = document.createElement('div');
+    lbl.className = 'miss-label';
+    lbl.textContent = row.added ? '已加入歌單' : (row.custom ? '自行新增' : '疑似曲目，解析不到調性');
+    box.appendChild(lbl);
+    let input = null;
+    if (row.custom) {
+      input = document.createElement('input');
+      input.type = 'text'; input.placeholder = '曲名'; input.value = row.text;
+      input.setAttribute('aria-label', '曲名');
+      input.addEventListener('input', () => {
+        row.text = input.value;
+        if (row.added) refreshSongs(false, false); else persistManual();
+      });
+    } else {
+      const t = document.createElement('div');
+      t.className = 'miss-text'; t.textContent = row.text;
+      box.appendChild(t);
+    }
+    const ctrl = document.createElement('div');
+    ctrl.className = 'miss-row';
+    if (input) ctrl.appendChild(input);
+    const sel = keySelect(row);
+    ctrl.appendChild(sel);
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn';
+    btn.textContent = row.added ? '移除' : '加入歌單';
+    btn.addEventListener('click', () => {
+      if (!row.added) {
+        if (row.pc === null) { sel.focus(); return; }
+        if (row.custom && !row.text.trim()) { input.focus(); return; }
+        row.added = true;
+      } else {
+        row.added = false;
+        if (row.custom) customRows = customRows.filter(r => r !== row);
+      }
+      refreshSongs(true, true);
+    });
+    ctrl.appendChild(btn);
+    box.appendChild(ctrl);
+    missesEl.appendChild(box);
+  });
+  if (setlistInput.value.trim()) {
+    const add = document.createElement('button');
+    add.type = 'button'; add.className = 'btn miss-add-btn';
+    add.textContent = '＋ 自行新增曲目';
+    add.addEventListener('click', () => {
+      customRows.push({ text: '', pc: null, minor: false, added: false, custom: true });
+      renderMisses();
+      const inputs = missesEl.querySelectorAll('input[type="text"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+    missesEl.appendChild(add);
+  }
+}
 
 function renderSongs(animate) {
   songsEl.innerHTML = '';
@@ -655,6 +816,7 @@ function renderSongs(animate) {
     const metaBits = [];
     if (s.meter) metaBits.push('拍號 ' + s.meter);
     if (s.bpm) metaBits.push('♩ ' + s.bpm);
+    if (s.manual) metaBits.push('手動加入');
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'song';
@@ -702,16 +864,40 @@ function applySong(idx) {
 function updateSetlist() {
   const text = setlistInput.value;
   try { localStorage.setItem('ats_setlist', text); } catch (e) {}
-  const parsed = parseSetlist(text);
-  const sig = JSON.stringify(parsed);
+  const res = parseSetlist(text);
+  parsedSongs = res.songs;
+  const prev = missRows;
+  missRows = res.misses.map(t => {
+    const kept = prev.find(r => r.text === t);
+    if (kept) return kept;
+    const saved = savedManual.find(r => !r.custom && r.text === t);
+    return saved
+      ? { text: t, pc: saved.pc, minor: !!saved.minor, added: !!saved.added, custom: false }
+      : { text: t, pc: null, minor: false, added: false, custom: false };
+  });
+  if (!text.trim()) customRows = [];
+  refreshSongs(!firstRender, true);
+}
+
+function refreshSongs(animate, redrawMisses) {
+  const manual = missRows.concat(customRows)
+    .filter(r => r.added && r.pc !== null && (!r.custom || r.text.trim()))
+    .map(rowToSong);
+  const merged = parsedSongs.concat(manual);
+  const sig = JSON.stringify(merged);
   if (sig !== songsSig) {
     songsSig = sig;
-    songs = parsed;
-    renderSongs(!firstRender);
+    songs = merged;
+    renderSongs(animate);
   }
+  if (redrawMisses) renderMisses();
+  persistManual();
+  const waiting = missRows.filter(r => !r.added).length;
   setlistStatus.textContent = songs.length
-    ? '偵測到 ' + songs.length + ' 首曲目'
-    : (text.trim() ? '未偵測到曲目（每行：曲名 調性 速度）' : '');
+    ? '偵測到 ' + songs.length + ' 首曲目' + (waiting ? '，另有 ' + waiting + ' 行待確認' : '')
+    : (setlistInput.value.trim()
+        ? (waiting ? '有 ' + waiting + ' 行疑似曲目，請在下方指定調性' : '未偵測到曲目（可用下方「＋ 自行新增曲目」）')
+        : '');
 }
 
 /* --- Events --- */
