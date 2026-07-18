@@ -64,6 +64,10 @@
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .key-display .scale-name { font-size:16px; font-weight:400; color:#5d5d68; margin-left:9px; }
+  .key-display .key-song {
+    margin:8px auto 0; max-width:540px; padding:0 12px;
+    font-size:13px; font-weight:600; color:#047857; line-height:1.45;
+  }
 
   .actions { display:flex; justify-content:center; margin-bottom:24px; }
   .btn {
@@ -213,7 +217,8 @@
   #setlistInput::placeholder { color:#a3a3ad; }
   .setlist-actions { display:flex; align-items:center; gap:8px; margin-top:10px; }
   .setlist-status { margin-left:auto; font-size:12px; color:var(--muted); text-align:right; }
-  .songs { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .songs { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .songs:empty { display:none; }
   .song {
     display:block; width:100%; text-align:left; cursor:pointer; touch-action:manipulation;
     border-radius:14px; padding:12px 14px; border:1px solid #e3e3ea;
@@ -243,7 +248,8 @@
   .tag-sm { font-size:11px; padding:2px 6px; }
 
   /* --- 手動補歌（解析不到時的保底） --- */
-  .misses { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .misses { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .misses:empty { display:none; }
   .miss {
     border:1.5px dashed #cfcfda; border-radius:13px; background:#fbfbfd;
     padding:10px 12px; display:flex; flex-direction:column; gap:8px;
@@ -304,6 +310,7 @@
 <div class="key-display">
   <span class="root" id="dispRoot"></span>
   <span class="scale-name" id="dispScale"></span>
+  <div class="key-song" id="dispSong" hidden></div>
 </div>
 
 <div class="actions">
@@ -336,6 +343,8 @@
 </div>
 
 <div class="setlist">
+  <div class="songs" id="songs"></div>
+  <div class="misses" id="misses"></div>
   <div class="setlist-head">
     <label for="setlistInput">歌單解析 Setlist</label>
     <span class="hint">貼上訊息，自動抓出曲目與調性</span>
@@ -347,8 +356,6 @@
     <button class="btn" id="clearBtn">清除</button>
     <span class="setlist-status" id="setlistStatus" aria-live="polite"></span>
   </div>
-  <div class="songs" id="songs"></div>
-  <div class="misses" id="misses"></div>
 </div>
 
 <p class="footer">在 AutoTune 的 Scale 設定裡，把標記為 BAN 的音取消勾選即可。<br>升降記號會依調性自動選擇（例如 F 大調顯示 B♭ 而非 A#）。<br>點擊歌單中的曲目卡片，即可套用該曲的調性設定。</p>
@@ -506,6 +513,7 @@ const rootSel = document.getElementById('root');
 const scaleSel = document.getElementById('scale');
 const dispRoot = document.getElementById('dispRoot');
 const dispScale = document.getElementById('dispScale');
+const dispSong = document.getElementById('dispSong');
 const keepTitle = document.getElementById('keepTitle');
 const banTitle  = document.getElementById('banTitle');
 const keepTags  = document.getElementById('keepTags');
@@ -678,7 +686,7 @@ function scaleNameFor(song) {
   return song.key.minor ? '自然小調 Natural Minor' : '大調 Major';
 }
 
-let songs = [], songsSig = '';
+let songs = [], songsSig = '', activeSongIdx = -1;
 
 /* --- 手動補歌（解析不到時的保底） --- */
 const MANUAL_LABEL = ['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
@@ -845,14 +853,23 @@ function renderSongs(animate) {
 }
 
 function syncActiveSong(rootPc, scaleName) {
+  const match = s => !!s && s.key.pc === rootPc && scaleNameFor(s) === scaleName;
   [...songsEl.children].forEach(el => {
-    const s = songs[+el.dataset.idx];
-    el.classList.toggle('active', !!s && s.key.pc === rootPc && scaleNameFor(s) === scaleName);
+    el.classList.toggle('active', match(songs[+el.dataset.idx]));
   });
+  // 最上方顯示目前套用的曲目；手動改調性後若不再吻合就隱藏
+  let cur = match(songs[activeSongIdx]) ? songs[activeSongIdx] : null;
+  if (!cur) {
+    const hits = songs.filter(match);
+    if (hits.length === 1) cur = hits[0]; // 只有一首吻合時直接顯示
+  }
+  dispSong.hidden = !cur;
+  dispSong.textContent = cur ? '♪ ' + cur.title : '';
 }
 
 function applySong(idx) {
   const s = songs[idx]; if (!s) return;
+  activeSongIdx = idx;
   rootSel.value = s.key.pc;
   scaleSel.value = scaleNameFor(s);
   render();
