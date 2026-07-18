@@ -569,10 +569,10 @@ function playScaleArp() {
 
 /* --- Setlist parser --- */
 const LETTER_TO_PC = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
-const TEMPO_RE = /^\d{1,3}([\/*x×\-]\d{1,3})?(bpm)?$/i;
+const TEMPO_RE = /^(\d{1,3}([\/*x×\-]\d{1,3})?(bpm)?|[x×*]\d{1,2})$/i;
 
 function parseKeyToken(raw) {
-  const t = raw.replace(/^[(\[]+|[)\]]+$/g, '');
+  const t = raw.replace(/^[(\[]+|[)\]]+$/g, '').replace(/(調|key)$/i, '');
   const m = t.match(/^([A-G])([#♯b♭])?(m|min)?$/);
   if (!m) return null;
   let pc = LETTER_TO_PC[m[1]], label = m[1];
@@ -584,30 +584,43 @@ function parseKeyToken(raw) {
 
 function parseSetlist(text) {
   const out = [];
+  let pending = ''; // 已出現但還沒等到調性的曲名（曲名與調性分行的格式）
   for (const rawLine of text.split(/\r?\n/)) {
     let line = rawLine.trim();
-    if (!line || /https?:\/\/|youtu\.?be/i.test(line)) continue;
+    if (!line || /https?:\/\/|youtu\.?be/i.test(line)) { pending = ''; continue; }
+    const numbered = /^\d{1,3}\s*[.)、．]\s*/.test(line);
+    if (numbered) pending = ''; // 編號行代表新的一首歌
     line = line.replace(/^\d{1,3}\s*[.)、．]\s*/, '')
                .replace(/（/g, '(').replace(/）/g, ')')
                .replace(/[，、]/g, ' ');
     // 逗號視為分隔符，但保留數字千分位（如 10,000 Reasons）
     line = line.replace(/,/g, (m, off, s) =>
       /\d/.test(s[off - 1] || '') && /\d/.test(s[off + 1] || '') ? ',' : ' ');
+    if (/^\([^)]*\)$/.test(line)) continue; // 整行括號備註（如「請樂器參考本版本編曲」）
     const toks = line.split(/\s+/).filter(Boolean);
-    for (let i = toks.length - 1; i >= 1; i--) {
+    let matched = false;
+    for (let i = toks.length - 1; i >= 0; i--) {
       const key = parseKeyToken(toks[i]);
       if (!key) continue;
-      const rest = toks.slice(i + 1)
+      let restRaw = toks.slice(i + 1);
+      const note = restRaw.findIndex(t => t.startsWith('('));
+      if (note !== -1) restRaw = restRaw.slice(0, note); // 調性後的括號備註（如「太高可能改G調」）
+      const rest = restRaw
         .map(t => t.replace(/^[(\[]+|[)\]]+$/g, ''))
-        .filter(t => t && !/^key$/i.test(t));
+        .filter(t => t && !/^(key|bpm|調|[\/|·-]+)$/i.test(t));
       if (!rest.every(t => TEMPO_RE.test(t))) continue;
-      const title = toks.slice(0, i).join(' ').replace(/[\s\-–—·(\[]+$/, '').trim();
-      if (!/[A-Za-z0-9぀-ヿ一-鿿]/.test(title) || /[:：]$/.test(title)) break;
+      let title = toks.slice(0, i).join(' ').replace(/[\s\-–—·(\[]+$/, '').trim();
+      if (pending) title = title ? pending + ' ' + title : pending;
+      if (!title || !/[A-Za-z0-9぀-ヿ一-鿿]/.test(title) || /[:：]$/.test(title)) break;
       const meter = rest.find(t => /^\d{1,2}\/\d{1,2}$/.test(t)) || '';
-      const bpm = rest.filter(t => t !== meter).join(' ').replace(/[*x]/gi, '×');
+      const bpm = rest.filter(t => t !== meter).join(' ').replace(/\s*[*x×]\s*/gi, '×');
       out.push({ title, key, meter, bpm });
+      matched = true;
       break;
     }
+    if (matched) { pending = ''; continue; }
+    if (numbered) pending = toks.join(' ');            // 曲名行，等下一行的調性
+    else if (pending) pending += ' ' + toks.join(' '); // 曲名的延續行
   }
   return out;
 }
