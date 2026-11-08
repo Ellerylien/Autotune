@@ -69,7 +69,19 @@
     font-size:13px; font-weight:600; color:#047857; line-height:1.45;
   }
 
-  .actions { display:flex; justify-content:center; margin-bottom:24px; }
+  .key-display .song-pos {
+    font-size:11px; font-weight:600; color:#8e8e99; margin-right:7px;
+    font-variant-numeric:tabular-nums; letter-spacing:.04em;
+  }
+
+  .actions { display:flex; justify-content:center; align-items:center; gap:14px; margin-bottom:24px; }
+  .btn.nav-btn {
+    width:40px; height:40px; padding:0; border-radius:50%; justify-content:center; color:#4a4a55;
+  }
+  .btn.nav-btn[hidden] { display:none; }
+  .btn.nav-btn:hover { color:#047857; border-color:rgba(5,150,105,.45); }
+  .btn.nav-btn:disabled { opacity:.35; box-shadow:none; color:#4a4a55; border-color:#e0e0e8; background:#ffffff; }
+  .btn.nav-btn:disabled:active { transform:none; }
   .btn {
     display:inline-flex; align-items:center; gap:7px; padding:10px 17px; border-radius:11px;
     border:1px solid #e0e0e8; background:#ffffff; color:#3a3a44;
@@ -314,10 +326,16 @@
 </div>
 
 <div class="actions">
+  <button class="btn nav-btn" id="prevBtn" type="button" aria-label="上一首" title="上一首（←）" hidden>
+    <svg width="9" height="14" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 1.5L2 7l5.5 5.5"/></svg>
+  </button>
   <button class="btn btn-primary" id="playBtn">
     <svg class="play-ico" width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg>
     <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
     <span id="playLabel">播放音階</span>
+  </button>
+  <button class="btn nav-btn" id="nextBtn" type="button" aria-label="下一首" title="下一首（→）" hidden>
+    <svg width="9" height="14" viewBox="0 0 9 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5L7 7l-5.5 5.5"/></svg>
   </button>
 </div>
 
@@ -525,6 +543,8 @@ const setlistInput  = document.getElementById('setlistInput');
 const setlistStatus = document.getElementById('setlistStatus');
 const songsEl   = document.getElementById('songs');
 const missesEl  = document.getElementById('misses');
+const prevBtn   = document.getElementById('prevBtn');
+const nextBtn   = document.getElementById('nextBtn');
 
 function render() {
   const rootPc = +rootSel.value;
@@ -686,7 +706,7 @@ function scaleNameFor(song) {
   return song.key.minor ? '自然小調 Natural Minor' : '大調 Major';
 }
 
-let songs = [], songsSig = '', activeSongIdx = -1;
+let songs = [], songsSig = '', activeSongIdx = -1, shownSongIdx = -1;
 
 /* --- 手動補歌（解析不到時的保底） --- */
 const MANUAL_LABEL = ['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
@@ -858,16 +878,47 @@ function syncActiveSong(rootPc, scaleName) {
     el.classList.toggle('active', match(songs[+el.dataset.idx]));
   });
   // 最上方顯示目前套用的曲目；手動改調性後若不再吻合就隱藏
-  let cur = match(songs[activeSongIdx]) ? songs[activeSongIdx] : null;
-  if (!cur) {
-    const hits = songs.filter(match);
-    if (hits.length === 1) cur = hits[0]; // 只有一首吻合時直接顯示
+  let curIdx = match(songs[activeSongIdx]) ? activeSongIdx : -1;
+  if (curIdx === -1) {
+    const hits = songs.map((s, i) => match(s) ? i : -1).filter(i => i !== -1);
+    if (hits.length === 1) curIdx = hits[0]; // 只有一首吻合時直接顯示
   }
+  const cur = songs[curIdx];
+  const prevShown = shownSongIdx;
+  shownSongIdx = cur ? curIdx : -1;
   dispSong.hidden = !cur;
-  dispSong.textContent = cur ? '♪ ' + cur.title : '';
+  dispSong.innerHTML = cur
+    ? (songs.length > 1 ? '<span class="song-pos">' + (curIdx + 1) + ' / ' + songs.length + '</span>' : '') +
+      '♪ ' + esc(cur.title)
+    : '';
+  if (cur && prevShown !== -1 && prevShown !== curIdx && !firstRender && anim()) {
+    gsap.fromTo(dispSong, { y: 6, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: .35, ease: 'power3.out', overwrite: 'auto', clearProps: 'all' });
+  }
+  syncNav();
 }
 
-function applySong(idx) {
+/* --- 上一首／下一首 --- */
+function syncNav() {
+  const show = songs.length > 1;
+  prevBtn.hidden = nextBtn.hidden = !show;
+  if (!show) return;
+  // 尚未選曲（或手動改到不吻合的調）時，兩顆都可按，從第一首開始
+  prevBtn.disabled = shownSongIdx === 0;
+  nextBtn.disabled = shownSongIdx === songs.length - 1;
+}
+function stepSong(dir) {
+  if (songs.length < 2) return;
+  const next = shownSongIdx === -1 ? 0 : shownSongIdx + dir;
+  if (next < 0 || next >= songs.length) return;
+  applySong(next, false);
+  const card = songsEl.children[next];
+  if (card && anim()) {
+    gsap.fromTo(card, { scale: .985 }, { scale: 1, duration: .3, ease: 'back.out(2)', clearProps: 'transform' });
+  }
+}
+
+function applySong(idx, scroll = true) {
   const s = songs[idx]; if (!s) return;
   activeSongIdx = idx;
   rootSel.value = s.key.pc;
@@ -875,7 +926,7 @@ function applySong(idx) {
   render();
   playMidi(60 + s.key.pc, 0, 0.5, 0.14);
   pianoCase.classList.remove('applied'); void pianoCase.offsetWidth; pianoCase.classList.add('applied');
-  pianoCase.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+  if (scroll) pianoCase.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
 }
 
 function updateSetlist() {
@@ -921,6 +972,14 @@ function refreshSongs(animate, redrawMisses) {
 rootSel.addEventListener('change', () => { render(); playMidi(60 + (+rootSel.value), 0, 0.5, 0.14); });
 scaleSel.addEventListener('change', render);
 playBtn.addEventListener('click', playScaleArp);
+prevBtn.addEventListener('click', () => stepSong(-1));
+nextBtn.addEventListener('click', () => stepSong(1));
+document.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); stepSong(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepSong(1); }
+});
 
 let setlistTimer;
 setlistInput.addEventListener('input', () => {
